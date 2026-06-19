@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EkoKonteiners — atkritumu konteineru noma online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --green:#1f9d55; --green-dark:#157347; --green-soft:#e8f7ee;
+    --ink:#16241c; --muted:#6b7c72; --line:#e4ebe6;
+    --bg:#f4f7f5; --card:#ffffff; --amber:#f59e0b; --blue:#3b82f6;
+    --orange:#f97316; --purple:#8b5cf6; --red:#ef4444;
+    --shadow:0 10px 30px rgba(20,60,40,.08);
+    --shadow-lg:0 24px 60px rgba(20,60,40,.16);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  input,select,textarea{font-family:inherit;font-size:15px}
+  a{color:inherit}
+  .hidden{display:none !important}
+
+  /* ---------- Buttons ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 20px;border-radius:12px;font-weight:600;font-size:15px;transition:.18s;white-space:nowrap}
+  .btn-primary{background:var(--green);color:#fff;box-shadow:0 8px 20px rgba(31,157,85,.28)}
+  .btn-primary:hover{background:var(--green-dark);transform:translateY(-1px)}
+  .btn-ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+  .btn-ghost:hover{border-color:var(--green);color:var(--green)}
+  .btn-sm{padding:8px 14px;font-size:13.5px;border-radius:10px}
+  .btn-block{width:100%}
+
+  /* ---------- Auth screen ---------- */
+  #authView{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr}
+  .auth-hero{position:relative;background:linear-gradient(150deg,#157347,#1f9d55 55%,#34c77b);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
+  .auth-hero::after{content:"";position:absolute;right:-120px;bottom:-120px;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.08)}
+  .auth-hero::before{content:"";position:absolute;left:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.06)}
+  .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:22px;position:relative;z-index:2}
+  .brand .logo{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.18);display:grid;place-items:center}
+  .hero-mid{position:relative;z-index:2;max-width:460px}
+  .hero-mid h1{font-size:42px;line-height:1.1;font-weight:800;margin-bottom:18px}
+  .hero-mid p{font-size:17px;opacity:.92}
+  .hero-points{list-style:none;margin-top:28px;display:flex;flex-direction:column;gap:14px}
+  .hero-points li{display:flex;align-items:center;gap:12px;font-weight:500}
+  .hero-points .tick{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;flex:none}
+  .hero-foot{position:relative;z-index:2;opacity:.8;font-size:13px}
+
+  .auth-panel{display:flex;align-items:center;justify-content:center;padding:40px}
+  .auth-card{width:100%;max-width:400px}
+  .auth-card h2{font-size:26px;font-weight:800;margin-bottom:6px}
+  .auth-card .sub{color:var(--muted);margin-bottom:26px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:13.5px;font-weight:600;margin-bottom:7px}
+  .field input{width:100%;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fbfdfb;transition:.15s}
+  .field input:focus{outline:none;border-color:var(--green);background:#fff;box-shadow:0 0 0 4px var(--green-soft)}
+  .auth-switch{text-align:center;margin-top:20px;color:var(--muted);font-size:14.5px}
+  .auth-switch button{color:var(--green);font-weight:700}
+  .err{background:#fef2f2;color:#b91c1c;padding:11px 14px;border-radius:11px;font-size:14px;margin-bottom:16px;font-weight:500}
+  .test-box{margin-top:24px;background:var(--green-soft);border:1px dashed #9bd6b3;border-radius:14px;padding:14px 16px;font-size:13px}
+  .test-box b{display:block;margin-bottom:8px;color:var(--green-dark)}
+  .test-box .row{display:flex;justify-content:space-between;gap:8px;padding:3px 0}
+  .test-box code{background:#fff;padding:2px 7px;border-radius:6px;font-size:12.5px}
+  .test-box .fill{margin-left:6px;color:var(--green-dark);font-weight:700;cursor:pointer;text-decoration:underline}
+
+  /* ---------- App shell ---------- */
+  .topbar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:50}
+  .topbar-in{max-width:1180px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:18px}
+  .topbar .brand{color:var(--ink);font-size:19px}
+  .topbar .brand .logo{background:var(--green-soft);color:var(--green)}
+  .spacer{flex:1}
+  .who{display:flex;align-items:center;gap:11px}
+  .avatar{width:38px;height:38px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;font-weight:700}
+  .who .meta{line-height:1.2}
+  .who .meta b{font-size:14px}
+  .who .meta span{font-size:12px;color:var(--muted)}
+  .role-pill{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:3px 9px;border-radius:20px;background:var(--green-soft);color:var(--green-dark)}
+  .role-pill.admin{background:#ede9fe;color:#6d28d9}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:30px 24px 70px}
+  .page-head{margin-bottom:26px}
+  .page-head h1{font-size:28px;font-weight:800}
+  .page-head p{color:var(--muted);margin-top:4px}
+
+  .tabs{display:flex;gap:6px;background:#fff;padding:6px;border-radius:14px;width:fit-content;margin-bottom:26px;box-shadow:var(--shadow)}
+  .tabs button{padding:10px 18px;border-radius:10px;font-weight:600;color:var(--muted);font-size:14.5px}
+  .tabs button.active{background:var(--green);color:#fff}
+
+  /* ---------- Container catalog ---------- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:22px}
+  .cont-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:.2s;border:1px solid #eef3f0}
+  .cont-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-4px)}
+  .cont-img{height:170px;display:grid;place-items:center;position:relative}
+  .cont-img .badge{position:absolute;top:12px;left:12px;background:rgba(255,255,255,.92);padding:5px 11px;border-radius:20px;font-size:12.5px;font-weight:700}
+  .cont-body{padding:18px 20px 20px}
+  .cont-body h3{font-size:19px;font-weight:800}
+  .cont-body .use{color:var(--muted);font-size:13.5px;margin:5px 0 14px;min-height:38px}
+  .price-row{display:flex;align-items:baseline;gap:6px;margin-bottom:4px}
+  .price-row .big{font-size:26px;font-weight:800;color:var(--green-dark)}
+  .price-row .unit{color:var(--muted);font-size:13px}
+  .incl{font-size:12.5px;color:var(--muted);margin-bottom:16px}
+  .incl b{color:var(--ink)}
+
+  /* ---------- Booking form ---------- */
+  .booking-layout{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:start}
+  .panel{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:26px}
+  .panel h2{font-size:18px;font-weight:800;margin-bottom:18px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .form-grid .full{grid-column:1/-1}
+  .field-2 label{display:block;font-size:13.5px;font-weight:600;margin-bottom:7px}
+  .field-2 input,.field-2 select,.field-2 textarea{width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:11px;background:#fbfdfb}
+  .field-2 input:focus,.field-2 select:focus,.field-2 textarea:focus{outline:none;border-color:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .field-2 textarea{resize:vertical;min-height:74px}
+
+  .summary{position:sticky;top:90px}
+  .summary .pick{display:flex;align-items:center;gap:14px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .summary .pick .mini{width:60px;height:60px;border-radius:12px;display:grid;place-items:center;flex:none}
+  .summary .pick b{font-size:16px}
+  .summary .pick span{color:var(--muted);font-size:13px}
+  .sum-line{display:flex;justify-content:space-between;padding:8px 0;font-size:14.5px;color:var(--muted)}
+  .sum-line b{color:var(--ink);font-weight:600}
+  .sum-total{display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid var(--line);margin-top:8px;padding-top:14px}
+  .sum-total span{font-weight:600}
+  .sum-total .amt{font-size:30px;font-weight:800;color:var(--green-dark)}
+  .pay-note{background:#fff8eb;border:1px solid #fde9bf;color:#92600b;font-size:12.5px;padding:10px 12px;border-radius:11px;margin:14px 0}
+  .empty-pick{text-align:center;color:var(--muted);padding:30px 10px}
+
+  /* ---------- Bookings list / table ---------- */
+  .booking-item{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:18px 20px;display:flex;align-items:center;gap:18px;margin-bottom:14px}
+  .booking-item .mini{width:54px;height:54px;border-radius:12px;display:grid;place-items:center;flex:none}
+  .booking-item .info{flex:1;min-width:0}
+  .booking-item .info b{font-size:15.5px}
+  .booking-item .info .det{color:var(--muted);font-size:13px;margin-top:3px}
+  .booking-item .price{font-weight:800;font-size:18px;color:var(--green-dark)}
+
+  .status{font-size:12px;font-weight:700;padding:5px 11px;border-radius:20px;white-space:nowrap}
+  .st-pending{background:#fef3c7;color:#92600b}
+  .st-approved{background:#dbeafe;color:#1e40af}
+  .st-delivered{background:#e0f2fe;color:#075985}
+  .st-collected{background:var(--green-soft);color:var(--green-dark)}
+  .st-cancelled{background:#fee2e2;color:#b91c1c}
+
+  /* ---------- Admin ---------- */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:18px;margin-bottom:28px}
+  .stat{background:#fff;border-radius:16px;box-shadow:var(--shadow);padding:20px 22px}
+  .stat .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;margin-bottom:12px;font-size:20px}
+  .stat .num{font-size:28px;font-weight:800}
+  .stat .lbl{color:var(--muted);font-size:13.5px}
+
+  .table-wrap{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .table-head{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)}
+  .table-head h2{font-size:17px;font-weight:800}
+  .filterbar{display:flex;gap:8px;flex-wrap:wrap}
+  .filterbar button{padding:7px 13px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted);border:1.5px solid var(--line)}
+  .filterbar button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:14px 22px;background:#fafcfb}
+  td{padding:15px 22px;border-top:1px solid var(--line);font-size:14px;vertical-align:middle}
+  td .client-name{font-weight:600}
+  td .client-mail{color:var(--muted);font-size:12.5px}
+  td select{padding:7px 10px;border:1.5px solid var(--line);border-radius:9px;font-size:13px;font-weight:600}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:14px 22px;border-radius:14px;font-weight:600;box-shadow:var(--shadow-lg);z-index:200;transition:.35s;display:flex;gap:10px;align-items:center}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+
+  @media(max-width:900px){
+    #authView{grid-template-columns:1fr}
+    .auth-hero{display:none}
+    .booking-layout{grid-template-columns:1fr}
+    .summary{position:static}
+  }
+  @media(max-width:600px){
+    .form-grid{grid-template-columns:1fr}
+    .topbar .brand span.t{display:none}
+    th:nth-child(4),td:nth-child(4){display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH ============ -->
+<div id="authView">
+  <div class="auth-hero">
+    <div class="brand"><div class="logo">♻️</div> EkoKonteiners</div>
+    <div class="hero-mid">
+      <h1>Pasūti atkritumu konteineru dažu minūšu laikā</h1>
+      <p>Izvēlies izmēru, norādi nomas periodu un adresi — pārējo izdarīsim mēs. Ātri, ērti un videi draudzīgi.</p>
+      <ul class="hero-points">
+        <li><span class="tick">✓</span> 5 izmēri no 2,5 līdz 20 m³</li>
+        <li><span class="tick">✓</span> Cena redzama uzreiz, bez slēptām izmaksām</li>
+        <li><span class="tick">✓</span> Piegāde un savākšana iekļauta</li>
+      </ul>
+    </div>
+    <div class="hero-foot">Demonstrācijas versija · paraugs · 2026</div>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <!-- LOGIN -->
+      <div id="loginForm">
+        <h2>Sveiks atpakaļ 👋</h2>
+        <p class="sub">Ielogojies, lai pārvaldītu savus pasūtījumus</p>
+        <div id="loginErr" class="err hidden"></div>
+        <div class="field"><label>E-pasts</label><input id="li-email" type="email" placeholder="tavs@epasts.lv" autocomplete="username" /></div>
+        <div class="field"><label>Parole</label><input id="li-pass" type="password" placeholder="••••••••" autocomplete="current-password" /></div>
+        <button class="btn btn-primary btn-block" onclick="doLogin()">Ielogoties</button>
+        <div class="auth-switch">Nav konta? <button onclick="toggleAuth('register')">Reģistrēties</button></div>
+
+        <div class="test-box">
+          <b>🔑 Testa konti (klikšķini, lai aizpildītu)</b>
+          <div class="row"><span>👤 Klients</span><span><code>klients@demo.lv</code> / <code>klients123</code><span class="fill" onclick="fill('klients@demo.lv','klients123')">aizpildīt</span></span></div>
+          <div class="row"><span>🛠️ Admins</span><span><code>admin@demo.lv</code> / <code>admin123</code><span class="fill" onclick="fill('admin@demo.lv','admin123')">aizpildīt</span></span></div>
+        </div>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="registerForm" class="hidden">
+        <h2>Izveido kontu</h2>
+        <p class="sub">Pāris solī un vari pasūtīt konteineru</p>
+        <div id="regErr" class="err hidden"></div>
+        <div class="field"><label>Vārds, uzvārds</label><input id="re-name" placeholder="Jānis Bērziņš" /></div>
+        <div class="field"><label>E-pasts</label><input id="re-email" type="email" placeholder="tavs@epasts.lv" /></div>
+        <div class="field"><label>Tālrunis</label><input id="re-phone" placeholder="+371 ..." /></div>
+        <div class="field"><label>Parole</label><input id="re-pass" type="password" placeholder="Vismaz 5 simboli" /></div>
+        <button class="btn btn-primary btn-block" onclick="doRegister()">Reģistrēties</button>
+        <div class="auth-switch">Jau ir konts? <button onclick="toggleAuth('login')">Ielogoties</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="appView" class="hidden">
+  <div class="topbar">
+    <div class="topbar-in">
+      <div class="brand"><div class="logo">♻️</div> <span class="t">EkoKonteiners</span></div>
+      <span id="topRole" class="role-pill"></span>
+      <div class="spacer"></div>
+      <div class="who">
+        <div class="avatar" id="topAvatar">?</div>
+        <div class="meta"><b id="topName"></b><br><span id="topEmail"></span></div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()">Iziet</button>
+    </div>
+  </div>
+
+  <!-- CLIENT -->
+  <div id="clientView" class="wrap hidden">
+    <div class="tabs">
+      <button id="tab-cat" class="active" onclick="clientTab('cat')">📦 Pasūtīt konteineru</button>
+      <button id="tab-mine" onclick="clientTab('mine')">🧾 Mani pasūtījumi <span id="mineCount"></span></button>
+    </div>
+
+    <!-- catalog + booking -->
+    <div id="catView">
+      <div class="page-head"><h1>Izvēlies konteineru</h1><p>Visi izmēri ar piegādi un savākšanu. Izvēlies vienu, lai turpinātu pasūtījumu.</p></div>
+      <div class="booking-layout">
+        <div>
+          <div class="grid" id="catGrid"></div>
+        </div>
+        <div class="panel summary" id="summaryPanel"></div>
+      </div>
+    </div>
+
+    <!-- my bookings -->
+    <div id="mineView" class="hidden">
+      <div class="page-head"><h1>Mani pasūtījumi</h1><p>Šeit redzami visi tavi konteineru pasūtījumi un to statuss.</p></div>
+      <div id="mineList"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="adminView" class="wrap hidden">
+    <div class="page-head"><h1>Administratora panelis</h1><p>Visi klientu pasūtījumi vienuviet. Maini statusu, lai sekotu līdzi piegādei.</p></div>
+    <div class="stats" id="adminStats"></div>
+    <div class="table-wrap">
+      <div class="table-head">
+        <h2>Pasūtījumi</h2>
+        <div class="spacer"></div>
+        <div class="filterbar" id="adminFilters"></div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Klients</th><th>Konteiners</th><th>Periods</th><th>Adrese</th><th>Summa</th><th>Statuss</th></tr></thead>
+          <tbody id="adminRows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* ============================================================
+   EkoKonteiners — demo (vienkārša online konteineru noma)
+   Dati glabājas pārlūkā (localStorage). Reāla apmaksa NAV pievienota.
+   ============================================================ */
+
+/* ----- Konteineru katalogs (piemēra cenas, Latvijas tirgus) ----- */
+const CONTAINERS = [
+  {id:'c25', size:'2,5 m³', name:'Mini',     use:'Mazi remontdarbi, dārza atkritumi', base:110, inclDays:2, perDay:5,  color:'#f59e0b', soft:'#fef3c7'},
+  {id:'c5',  size:'5 m³',   name:'Standarta',use:'Dzīvokļa remonts, mēbeles',         base:135, inclDays:2, perDay:5,  color:'#3b82f6', soft:'#dbeafe'},
+  {id:'c7',  size:'7 m³',   name:'Vidējais', use:'Mājas renovācija, jumta darbi',     base:165, inclDays:7, perDay:5,  color:'#1f9d55', soft:'#e8f7ee'},
+  {id:'c10', size:'10 m³',  name:'Lielais',  use:'Būvniecība, demontāža',             base:215, inclDays:7, perDay:5,  color:'#f97316', soft:'#ffedd5'},
+  {id:'c20', size:'20 m³',  name:'Maxi',     use:'Lieli objekti, lielgabarīts',       base:320, inclDays:7, perDay:10, color:'#8b5cf6', soft:'#ede9fe'},
+];
+
+const STATUSES = {
+  pending:   {label:'Gaida apstiprinājumu', cls:'st-pending'},
+  approved:  {label:'Apstiprināts',         cls:'st-approved'},
+  delivered: {label:'Piegādāts',            cls:'st-delivered'},
+  collected: {label:'Savākts',              cls:'st-collected'},
+  cancelled: {label:'Atcelts',              cls:'st-cancelled'},
+};
+
+/* ----- SVG konteinera ilustrācija ----- */
+function dumpster(color, size){
+  size = size || 110;
+  return `<svg width="${size}" height="${size*0.62}" viewBox="0 0 200 124" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="100" cy="116" rx="86" ry="7" fill="rgba(0,0,0,.07)"/>
+    <path d="M22 44 L178 44 L162 104 L38 104 Z" fill="${color}"/>
+    <path d="M22 44 L178 44 L172 66 L28 66 Z" fill="#fff" opacity=".18"/>
+    <rect x="14" y="36" width="172" height="12" rx="6" fill="${color}" stroke="rgba(0,0,0,.08)"/>
+    <path d="M38 104 L162 104 L158 116 L42 116 Z" fill="rgba(0,0,0,.18)"/>
+    <line x1="60" y1="52" x2="52" y2="96" stroke="rgba(0,0,0,.13)" stroke-width="3"/>
+    <line x1="100" y1="52" x2="100" y2="96" stroke="rgba(0,0,0,.13)" stroke-width="3"/>
+    <line x1="140" y1="52" x2="148" y2="96" stroke="rgba(0,0,0,.13)" stroke-width="3"/>
+    <circle cx="100" cy="30" r="11" fill="#fff" opacity=".9"/>
+    <text x="100" y="35" font-size="13" text-anchor="middle" fill="${color}" font-weight="bold">♺</text>
+  </svg>`;
+}
+
+/* ----- Datu slānis (localStorage) ----- */
+const DB = {
+  load(k, def){ try{ return JSON.parse(localStorage.getItem('ek_'+k)) ?? def }catch(e){ return def } },
+  save(k, v){ localStorage.setItem('ek_'+k, JSON.stringify(v)) },
+};
+
+function seed(){
+  if(DB.load('seeded')) return;
+  const users = [
+    {id:'u_admin', name:'Administrators', email:'admin@demo.lv',   phone:'+371 20000000', pass:'admin123',   role:'admin'},
+    {id:'u_client',name:'Jānis Bērziņš',  email:'klients@demo.lv', phone:'+371 29123456', pass:'klients123', role:'client'},
+  ];
+  const today = new Date();
+  const d = (off)=>{const x=new Date(today);x.setDate(x.getDate()+off);return x.toISOString().slice(0,10)};
+  const bookings = [
+    mkBooking('u_client','Jānis Bērziņš','klients@demo.lv','+371 29123456','c7', d(-3), d(4), 'Brīvības iela 112, Rīga', 'delivered'),
+    mkBooking('u_client','Jānis Bērziņš','klients@demo.lv','+371 29123456','c5', d(2),  d(5), 'Skolas iela 4, Jelgava',  'pending'),
+    {...mkBooking('u2','Anna Liepa','anna.liepa@inbox.lv','+371 26500100','c10', d(-10), d(-3), 'Rūpniecības 8, Saldus', 'collected')},
+    {...mkBooking('u3','SIA BūveLat','info@buvelat.lv','+371 67000000','c20', d(1), d(15), 'Daugavas iela 25, Bauska', 'approved')},
+  ];
+  DB.save('users', users);
+  DB.save('bookings', bookings);
+  DB.save('seeded', true);
+}
+
+let _seq = 1000;
+function mkBooking(uid,name,email,phone,contId,from,to,address,status){
+  const c = CONTAINERS.find(x=>x.id===contId);
+  const days = dayCount(from,to);
+  return {
+    id:'b'+(++_seq), userId:uid, clientName:name, clientEmail:email, clientPhone:phone,
+    contId, from, to, address, status,
+    createdAt: from,
+    total: calcPrice(c, days),
+  };
+}
+
+/* ----- Aprēķini ----- */
+function dayCount(from,to){
+  const a=new Date(from), b=new Date(to);
+  const diff = Math.round((b-a)/86400000);
+  return Math.max(1, diff);
+}
+function calcPrice(c, days){
+  const extra = Math.max(0, days - c.inclDays);
+  return c.base + extra*c.perDay;
+}
+function eur(n){ return n.toLocaleString('lv-LV')+' €'; }
+
+/* ----- Sesija ----- */
+let session = null;
+function setSession(u){ session=u; DB.save('session', u?u.id:null); }
+
+/* ============ AUTH ============ */
+function toggleAuth(which){
+  document.getElementById('loginForm').classList.toggle('hidden', which!=='login');
+  document.getElementById('registerForm').classList.toggle('hidden', which!=='register');
+}
+function fill(email,pass){
+  document.getElementById('li-email').value=email;
+  document.getElementById('li-pass').value=pass;
+}
+function showErr(id,msg){ const e=document.getElementById(id); e.textContent=msg; e.classList.remove('hidden'); }
+function hideErr(id){ document.getElementById(id).classList.add('hidden'); }
+
+function doLogin(){
+  hideErr('loginErr');
+  const email=document.getElementById('li-email').value.trim().toLowerCase();
+  const pass=document.getElementById('li-pass').value;
+  if(!email||!pass){ showErr('loginErr','Lūdzu ievadi e-pastu un paroli.'); return; }
+  const users=DB.load('users',[]);
+  const u=users.find(x=>x.email.toLowerCase()===email && x.pass===pass);
+  if(!u){ showErr('loginErr','Nepareizs e-pasts vai parole.'); return; }
+  setSession(u); enterApp();
+}
+
+function doRegister(){
+  hideErr('regErr');
+  const name=document.getElementById('re-name').value.trim();
+  const email=document.getElementById('re-email').value.trim().toLowerCase();
+  const phone=document.getElementById('re-phone').value.trim();
+  const pass=document.getElementById('re-pass').value;
+  if(!name||!email||!pass){ showErr('regErr','Aizpildi vārdu, e-pastu un paroli.'); return; }
+  if(pass.length<5){ showErr('regErr','Parolei jābūt vismaz 5 simbolus garai.'); return; }
+  const users=DB.load('users',[]);
+  if(users.some(x=>x.email.toLowerCase()===email)){ showErr('regErr','Šāds e-pasts jau reģistrēts.'); return; }
+  const u={id:'u'+Date.now(), name, email, phone, pass, role:'client'};
+  users.push(u); DB.save('users',users);
+  setSession(u); enterApp();
+  toast('Konts izveidots! Laipni lūdzam 🎉');
+}
+
+function doLogout(){ setSession(null); location.reload(); }
+
+/* ============ APP ENTRY ============ */
+function enterApp(){
+  document.getElementById('authView').classList.add('hidden');
+  document.getElementById('appView').classList.remove('hidden');
+  // topbar
+  document.getElementById('topName').textContent=session.name;
+  document.getElementById('topEmail').textContent=session.email;
+  document.getElementById('topAvatar').textContent=session.name.charAt(0).toUpperCase();
+  const role=document.getElementById('topRole');
+  if(session.role==='admin'){ role.textContent='Admins'; role.className='role-pill admin'; }
+  else { role.textContent='Klients'; role.className='role-pill'; }
+
+  if(session.role==='admin'){
+    document.getElementById('adminView').classList.remove('hidden');
+    document.getElementById('clientView').classList.add('hidden');
+    renderAdmin();
+  }else{
+    document.getElementById('clientView').classList.remove('hidden');
+    document.getElementById('adminView').classList.add('hidden');
+    renderCatalog(); renderSummary(); renderMine(); clientTab('cat');
+  }
+}
+
+/* ============ CLIENT: catalog ============ */
+let picked=null, draft={from:'',to:'',address:''};
+function clientTab(t){
+  document.getElementById('tab-cat').classList.toggle('active',t==='cat');
+  document.getElementById('tab-mine').classList.toggle('active',t==='mine');
+  document.getElementById('catView').classList.toggle('hidden',t!=='cat');
+  document.getElementById('mineView').classList.toggle('hidden',t!=='mine');
+  if(t==='mine') renderMine();
+}
+
+function renderCatalog(){
+  document.getElementById('catGrid').innerHTML = CONTAINERS.map(c=>`
+    <div class="cont-card">
+      <div class="cont-img" style="background:${c.soft}">
+        <div class="badge">${c.size}</div>
+        ${dumpster(c.color,150)}
+      </div>
+      <div class="cont-body">
+        <h3>${c.name}</h3>
+        <div class="use">${c.use}</div>
+        <div class="price-row"><span class="big">${eur(c.base)}</span><span class="unit">/ sākot no</span></div>
+        <div class="incl">Iekļautas <b>${c.inclDays} dienas</b> · tālāk +${eur(c.perDay)}/dienā</div>
+        <button class="btn ${picked===c.id?'btn-primary':'btn-ghost'} btn-block" onclick="pick('${c.id}')">
+          ${picked===c.id?'✓ Izvēlēts':'Izvēlēties'}
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+function pick(id){ picked=id; renderCatalog(); renderSummary();
+  document.getElementById('summaryPanel').scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function renderSummary(){
+  const p=document.getElementById('summaryPanel');
+  if(!picked){
+    p.innerHTML=`<h2>Pasūtījuma kopsavilkums</h2><div class="empty-pick">📦<br><br>Izvēlies konteineru no saraksta, lai turpinātu.</div>`;
+    return;
+  }
+  const c=CONTAINERS.find(x=>x.id===picked);
+  const days = (draft.from&&draft.to)? dayCount(draft.from,draft.to):0;
+  const valid = draft.from&&draft.to&&new Date(draft.to)>new Date(draft.from);
+  const total = valid? calcPrice(c,days):c.base;
+  const extra = valid? Math.max(0,days-c.inclDays):0;
+
+  p.innerHTML=`
+    <h2>Pasūtījuma kopsavilkums</h2>
+    <div class="pick">
+      <div class="mini" style="background:${c.soft}">${dumpster(c.color,52)}</div>
+      <div><b>${c.name} · ${c.size}</b><br><span>${c.use}</span></div>
+    </div>
+    <div class="form-grid">
+      <div class="field-2"><label>Sākuma datums</label><input type="date" id="f-from" value="${draft.from}" onchange="draftChange()"></div>
+      <div class="field-2"><label>Beigu datums</label><input type="date" id="f-to" value="${draft.to}" onchange="draftChange()"></div>
+      <div class="field-2 full"><label>Piegādes adrese</label><input id="f-addr" value="${draft.address}" placeholder="Iela, māja, pilsēta" oninput="draft.address=this.value"></div>
+    </div>
+    <div style="margin-top:18px">
+      <div class="sum-line"><span>Pamatcena (${c.inclDays} dienas)</span><b>${eur(c.base)}</b></div>
+      <div class="sum-line"><span>Nomas ilgums</span><b>${valid?days+' dienas':'—'}</b></div>
+      <div class="sum-line"><span>Papildu dienas (${extra} × ${eur(c.perDay)})</span><b>${eur(extra*c.perDay)}</b></div>
+      <div class="sum-total"><span>Kopā</span><span class="amt">${eur(total)}</span></div>
+    </div>
+    <div class="pay-note">💳 Apmaksa šajā demo nav aktivizēta — pasūtījums tiks nosūtīts apstiprināšanai bez maksājuma.</div>
+    <button class="btn btn-primary btn-block" onclick="submitBooking()">Pieteikt pasūtījumu</button>`;
+}
+function draftChange(){
+  draft.from=document.getElementById('f-from').value;
+  draft.to=document.getElementById('f-to').value;
+  renderSummary();
+}
+
+function submitBooking(){
+  const c=CONTAINERS.find(x=>x.id===picked);
+  draft.address=document.getElementById('f-addr').value.trim();
+  if(!draft.from||!draft.to){ toast('⚠️ Norādi sākuma un beigu datumu'); return; }
+  if(new Date(draft.to)<=new Date(draft.from)){ toast('⚠️ Beigu datumam jābūt pēc sākuma'); return; }
+  if(!draft.address){ toast('⚠️ Norādi piegādes adresi'); return; }
+  const days=dayCount(draft.from,draft.to);
+  const b={
+    id:'b'+Date.now(), userId:session.id, clientName:session.name, clientEmail:session.email,
+    clientPhone:session.phone||'', contId:c.id, from:draft.from, to:draft.to, address:draft.address,
+    status:'pending', createdAt:new Date().toISOString().slice(0,10), total:calcPrice(c,days),
+  };
+  const all=DB.load('bookings',[]); all.unshift(b); DB.save('bookings',all);
+  picked=null; draft={from:'',to:'',address:''};
+  renderCatalog(); renderSummary(); renderMine();
+  clientTab('mine');
+  toast('✅ Pasūtījums pieteikts! Gaida apstiprinājumu.');
+}
+
+function myBookings(){ return DB.load('bookings',[]).filter(b=>b.userId===session.id); }
+
+function renderMine(){
+  const list=myBookings();
+  document.getElementById('mineCount').textContent = list.length?`(${list.length})`:'';
+  const el=document.getElementById('mineList');
+  if(!list.length){ el.innerHTML=`<div class="panel" style="text-align:center;color:var(--muted);padding:50px">Tev vēl nav pasūtījumu.<br><br><button class="btn btn-primary" onclick="clientTab('cat')">Pasūtīt konteineru</button></div>`; return; }
+  el.innerHTML=list.map(b=>{
+    const c=CONTAINERS.find(x=>x.id===b.contId);
+    const s=STATUSES[b.status];
+    return `<div class="booking-item">
+      <div class="mini" style="background:${c.soft}">${dumpster(c.color,46)}</div>
+      <div class="info">
+        <b>${c.name} · ${c.size}</b>
+        <div class="det">📅 ${b.from} → ${b.to} (${dayCount(b.from,b.to)} dienas) · 📍 ${b.address}</div>
+      </div>
+      <div class="price">${eur(b.total)}</div>
+      <span class="status ${s.cls}">${s.label}</span>
+    </div>`;
+  }).join('');
+}
+
+/* ============ ADMIN ============ */
+let adminFilter='all';
+function renderAdmin(){
+  renderAdminStats();
+  renderAdminFilters();
+  renderAdminRows();
+}
+function renderAdminStats(){
+  const all=DB.load('bookings',[]);
+  const active=all.filter(b=>['approved','delivered'].includes(b.status)).length;
+  const pending=all.filter(b=>b.status==='pending').length;
+  const revenue=all.filter(b=>b.status!=='cancelled').reduce((s,b)=>s+b.total,0);
+  const cards=[
+    {ic:'📦',bg:'#e8f7ee',num:all.length,lbl:'Pasūtījumi kopā'},
+    {ic:'⏳',bg:'#fef3c7',num:pending,lbl:'Gaida apstiprinājumu'},
+    {ic:'🚚',bg:'#dbeafe',num:active,lbl:'Aktīvie / piegādē'},
+    {ic:'💰',bg:'#ede9fe',num:eur(revenue),lbl:'Kopējais apgrozījums'},
+  ];
+  document.getElementById('adminStats').innerHTML=cards.map(c=>`
+    <div class="stat"><div class="ic" style="background:${c.bg}">${c.ic}</div>
+    <div class="num">${c.num}</div><div class="lbl">${c.lbl}</div></div>`).join('');
+}
+function renderAdminFilters(){
+  const opts=[['all','Visi'],['pending','Gaida'],['approved','Apstiprināti'],['delivered','Piegādāti'],['collected','Savākti'],['cancelled','Atcelti']];
+  document.getElementById('adminFilters').innerHTML=opts.map(([k,l])=>
+    `<button class="${adminFilter===k?'active':''}" onclick="adminFilter='${k}';renderAdmin()">${l}</button>`).join('');
+}
+function renderAdminRows(){
+  let all=DB.load('bookings',[]);
+  if(adminFilter!=='all') all=all.filter(b=>b.status===adminFilter);
+  const rows=document.getElementById('adminRows');
+  if(!all.length){ rows.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px">Nav pasūtījumu šajā kategorijā.</td></tr>`; return; }
+  rows.innerHTML=all.map(b=>{
+    const c=CONTAINERS.find(x=>x.id===b.contId);
+    const s=STATUSES[b.status];
+    const sel=Object.keys(STATUSES).map(k=>`<option value="${k}" ${b.status===k?'selected':''}>${STATUSES[k].label}</option>`).join('');
+    return `<tr>
+      <td><div class="client-name">${b.clientName}</div><div class="client-mail">${b.clientEmail} · ${b.clientPhone||''}</div></td>
+      <td><b>${c.name}</b> · ${c.size}</td>
+      <td>${b.from}<br><span style="color:var(--muted);font-size:12.5px">→ ${b.to}</span></td>
+      <td>${b.address}</td>
+      <td><b style="color:var(--green-dark)">${eur(b.total)}</b></td>
+      <td>
+        <select onchange="changeStatus('${b.id}',this.value)">${sel}</select>
+        <div style="margin-top:6px"><span class="status ${s.cls}">${s.label}</span></div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function changeStatus(id,status){
+  const all=DB.load('bookings',[]);
+  const b=all.find(x=>x.id===id); if(!b) return;
+  b.status=status; DB.save('bookings',all);
+  renderAdmin();
+  toast('Statuss atjaunināts: '+STATUSES[status].label);
+}
+
+/* ============ Toast ============ */
+let toastTimer;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ============ Boot ============ */
+seed();
+(function boot(){
+  const sid=DB.load('session',null);
+  if(sid){ const u=DB.load('users',[]).find(x=>x.id===sid); if(u){ session=u; enterApp(); return; } }
+  toggleAuth('login');
+})();
+</script>
+</body>
+</html>
