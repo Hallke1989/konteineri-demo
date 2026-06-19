@@ -2,7 +2,7 @@
 <html lang="lv">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>EkoKonteiners — atkritumu konteineru noma online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -17,7 +17,7 @@
     --shadow-lg:0 24px 60px rgba(20,60,40,.16);
     --radius:18px;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
   body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
   button{font-family:inherit;cursor:pointer;border:none;background:none}
   input,select,textarea{font-family:inherit;font-size:15px}
@@ -32,9 +32,21 @@
   .btn-ghost:hover{border-color:var(--green);color:var(--green)}
   .btn-sm{padding:8px 14px;font-size:13.5px;border-radius:10px}
   .btn-block{width:100%}
+  /* touch feedback (:hover doesn't fire on touch) */
+  .btn:active{transform:scale(.985)}
+  .btn-primary:active{background:var(--green-dark)}
+  .btn-ghost:active{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .cont-card:active{transform:translateY(-2px)}
+  .tabs button:active{background:var(--green-soft);color:var(--green-dark)}
+  .filterbar button:active{background:#eef3f0}
+  .test-box .fill:active{background:var(--green-soft);transform:scale(.97)}
+  @media(hover:none){
+    .btn-primary:hover{transform:none}
+    .cont-card:hover{transform:none;box-shadow:var(--shadow)}
+  }
 
   /* ---------- Auth screen ---------- */
-  #authView{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr}
+  #authView{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:1.1fr 1fr}
   .auth-hero{position:relative;background:linear-gradient(150deg,#157347,#1f9d55 55%,#34c77b);color:#fff;padding:56px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden}
   .auth-hero::after{content:"";position:absolute;right:-120px;bottom:-120px;width:420px;height:420px;border-radius:50%;background:rgba(255,255,255,.08)}
   .auth-hero::before{content:"";position:absolute;left:-80px;top:-80px;width:260px;height:260px;border-radius:50%;background:rgba(255,255,255,.06)}
@@ -150,6 +162,7 @@
   .stat .lbl{color:var(--muted);font-size:13.5px}
 
   .table-wrap{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .admin-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
   .table-head{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line)}
   .table-head h2{font-size:17px;font-weight:800}
   .filterbar{display:flex;gap:8px;flex-wrap:wrap}
@@ -165,16 +178,89 @@
   .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ink);color:#fff;padding:14px 22px;border-radius:14px;font-weight:600;box-shadow:var(--shadow-lg);z-index:200;transition:.35s;display:flex;gap:10px;align-items:center}
   .toast.show{transform:translateX(-50%) translateY(0)}
 
+  /* mobile-only pieces (hidden on desktop) */
+  .auth-mhead{display:none}
+  .mobile-cta{display:none}
+
   @media(max-width:900px){
     #authView{grid-template-columns:1fr}
     .auth-hero{display:none}
+    .auth-panel{align-items:flex-start;padding:30px 18px;padding-bottom:calc(30px + env(safe-area-inset-bottom))}
+    .auth-mhead{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+    .auth-mhead .logo{width:46px;height:46px;border-radius:13px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-size:23px;flex:none}
+    .auth-mhead b{display:block;font-size:18px;font-weight:800;color:var(--ink)}
+    .auth-mhead span{display:block;font-size:12.5px;color:var(--muted)}
     .booking-layout{grid-template-columns:1fr}
     .summary{position:static}
+    .wrap{padding-bottom:96px}
+    .toast{bottom:84px}
+    /* sticky bottom checkout bar */
+    .mobile-cta:not(.hidden){display:flex;position:fixed;left:0;right:0;bottom:0;z-index:120;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-top:1px solid var(--line);padding:12px 16px;padding-bottom:calc(12px + env(safe-area-inset-bottom));box-shadow:0 -10px 30px rgba(20,60,40,.14)}
+    .mobile-cta .mc-info{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+    .mobile-cta .mc-info b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .mobile-cta .mc-info span{font-size:14px;color:var(--green-dark);font-weight:800}
+    .mobile-cta .btn{flex:none}
   }
+
   @media(max-width:600px){
-    .form-grid{grid-template-columns:1fr}
+    /* prevent iOS zoom-on-focus (any control <16px) */
+    input,select,textarea,.field input,.field-2 input,.field-2 select,.field-2 textarea,td select{font-size:16px}
+    /* tighter chrome + safe areas */
+    .wrap{padding:20px 14px 96px;padding-bottom:calc(96px + env(safe-area-inset-bottom));padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+    .panel{padding:18px}
+    .page-head{margin-bottom:18px}
+    .page-head h1{font-size:22px}
+    .page-head p{font-size:13.5px}
+    /* topbar */
+    .topbar-in{padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top));padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right));gap:10px}
     .topbar .brand span.t{display:none}
-    th:nth-child(4),td:nth-child(4){display:none}
+    .who{min-width:0}
+    .who .meta{min-width:0}
+    .who .meta b{font-size:13px;max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block}
+    .who .meta span{display:none}
+    .avatar{width:34px;height:34px}
+    .role-pill{padding:3px 7px;font-size:10px}
+    .btn-sm{padding:8px 12px}
+    /* booking form */
+    .form-grid{grid-template-columns:1fr}
+    .field-2 input[type=date]{min-height:46px}
+    /* tabs full width */
+    .tabs{width:100%;display:flex;gap:8px}
+    .tabs button{flex:1;min-width:0;min-height:46px;padding:11px 8px;font-size:13.5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    /* my-bookings: stack */
+    .booking-item{flex-wrap:wrap;gap:12px;padding:14px 16px}
+    .booking-item .mini{width:46px;height:46px}
+    .booking-item .info{flex:1 1 auto;min-width:0}
+    .booking-item .status{order:2;margin-left:auto}
+    .booking-item .price{order:3;flex:0 0 100%}
+    /* admin stats: 2-up */
+    .stats{grid-template-columns:1fr 1fr;gap:10px}
+    .stat{padding:14px}
+    .stat .num{font-size:22px}
+    .stat .ic{width:38px;height:38px;font-size:17px;margin-bottom:8px}
+    /* filter bar: single swipeable row */
+    .table-head{flex-wrap:wrap;align-items:flex-start;gap:10px}
+    .filterbar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;width:100%;padding-bottom:2px}
+    .filterbar::-webkit-scrollbar{display:none}
+    .filterbar button{flex:0 0 auto;min-height:42px;padding:10px 15px;font-size:13.5px}
+    /* test-account fill chips (bigger tap target) */
+    .test-box .row{flex-wrap:wrap;gap:6px;padding:8px 0}
+    .test-box .fill{display:inline-flex;align-items:center;min-height:34px;padding:6px 12px;margin-left:0;background:#fff;border:1px solid #9bd6b3;border-radius:8px}
+    /* admin table -> stacked cards */
+    .table-wrap{background:transparent;box-shadow:none;overflow:visible}
+    .table-head{padding:0 0 12px;border-bottom:none}
+    .admin-table-scroll{overflow-x:visible}
+    .table-wrap thead{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+    .table-wrap table,.table-wrap tbody,.table-wrap tr,.table-wrap td{display:block;width:100%}
+    .table-wrap tr{background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:4px 16px;margin:0 0 14px}
+    .table-wrap td{border-top:none;padding:11px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:14px;text-align:right;word-break:break-word;overflow-wrap:anywhere}
+    .table-wrap td+td{border-top:1px solid var(--line)}
+    .table-wrap td::before{content:attr(data-label);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);text-align:left;flex:none;padding-top:3px}
+    .table-wrap td[data-label="Statuss"]{display:block;text-align:left}
+    .table-wrap td[data-label="Statuss"]::before{display:block;margin-bottom:8px}
+    .table-wrap td[data-label="Statuss"] select{width:100%;min-height:46px;padding:11px 12px;border-radius:11px}
+    .table-wrap td.empty-row{display:block;text-align:center}
+    .table-wrap td.empty-row::before{display:none}
   }
 </style>
 </head>
@@ -197,6 +283,7 @@
   </div>
 
   <div class="auth-panel">
+    <div class="auth-mhead"><div class="logo">♻️</div><div><b>EkoKonteiners</b><span>Atkritumu konteineru noma online</span></div></div>
     <div class="auth-card">
       <!-- LOGIN -->
       <div id="loginForm">
@@ -281,7 +368,7 @@
         <div class="spacer"></div>
         <div class="filterbar" id="adminFilters"></div>
       </div>
-      <div style="overflow-x:auto">
+      <div class="admin-table-scroll">
         <table>
           <thead><tr><th>Klients</th><th>Konteiners</th><th>Periods</th><th>Adrese</th><th>Summa</th><th>Statuss</th></tr></thead>
           <tbody id="adminRows"></tbody>
@@ -291,6 +378,7 @@
   </div>
 </div>
 
+<div id="mobileCta" class="mobile-cta hidden"></div>
 <div id="toast" class="toast"></div>
 
 <script>
@@ -451,13 +539,19 @@ function enterApp(){
 }
 
 /* ============ CLIENT: catalog ============ */
-let picked=null, draft={from:'',to:'',address:''};
+let picked=null, draft={from:'',to:'',address:''}, clientCurrentTab='cat';
 function clientTab(t){
+  clientCurrentTab=t;
   document.getElementById('tab-cat').classList.toggle('active',t==='cat');
   document.getElementById('tab-mine').classList.toggle('active',t==='mine');
   document.getElementById('catView').classList.toggle('hidden',t!=='cat');
   document.getElementById('mineView').classList.toggle('hidden',t!=='mine');
   if(t==='mine') renderMine();
+  syncCta();
+}
+function syncCta(){
+  const m=document.getElementById('mobileCta'); if(!m) return;
+  m.classList.toggle('hidden', !(clientCurrentTab==='cat' && picked));
 }
 
 function renderCatalog(){
@@ -479,8 +573,8 @@ function renderCatalog(){
     </div>`).join('');
 }
 
-function pick(id){ picked=id; renderCatalog(); renderSummary();
-  document.getElementById('summaryPanel').scrollIntoView({behavior:'smooth',block:'center'});
+function pick(id){ picked=id; renderCatalog(); renderSummary(); syncCta();
+  if(window.innerWidth>900) document.getElementById('summaryPanel').scrollIntoView({behavior:'smooth',block:'center'});
 }
 
 function renderSummary(){
@@ -514,6 +608,8 @@ function renderSummary(){
     </div>
     <div class="pay-note">💳 Apmaksa šajā demo nav aktivizēta — pasūtījums tiks nosūtīts apstiprināšanai bez maksājuma.</div>
     <button class="btn btn-primary btn-block" onclick="submitBooking()">Pieteikt pasūtījumu</button>`;
+  const m=document.getElementById('mobileCta');
+  if(m) m.innerHTML=`<div class="mc-info"><b>${c.name} · ${c.size}</b><span>${eur(total)}</span></div><button class="btn btn-primary btn-sm" onclick="document.getElementById('summaryPanel').scrollIntoView({behavior:'smooth',block:'start'})">Turpināt →</button>`;
 }
 function draftChange(){
   draft.from=document.getElementById('f-from').value;
@@ -593,18 +689,18 @@ function renderAdminRows(){
   let all=DB.load('bookings',[]);
   if(adminFilter!=='all') all=all.filter(b=>b.status===adminFilter);
   const rows=document.getElementById('adminRows');
-  if(!all.length){ rows.innerHTML=`<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:40px">Nav pasūtījumu šajā kategorijā.</td></tr>`; return; }
+  if(!all.length){ rows.innerHTML=`<tr><td colspan="6" class="empty-row" style="text-align:center;color:var(--muted);padding:40px">Nav pasūtījumu šajā kategorijā.</td></tr>`; return; }
   rows.innerHTML=all.map(b=>{
     const c=CONTAINERS.find(x=>x.id===b.contId);
     const s=STATUSES[b.status];
     const sel=Object.keys(STATUSES).map(k=>`<option value="${k}" ${b.status===k?'selected':''}>${STATUSES[k].label}</option>`).join('');
     return `<tr>
-      <td><div class="client-name">${b.clientName}</div><div class="client-mail">${b.clientEmail} · ${b.clientPhone||''}</div></td>
-      <td><b>${c.name}</b> · ${c.size}</td>
-      <td>${b.from}<br><span style="color:var(--muted);font-size:12.5px">→ ${b.to}</span></td>
-      <td>${b.address}</td>
-      <td><b style="color:var(--green-dark)">${eur(b.total)}</b></td>
-      <td>
+      <td data-label="Klients"><div class="client-name">${b.clientName}</div><div class="client-mail">${b.clientEmail} · ${b.clientPhone||''}</div></td>
+      <td data-label="Konteiners"><b>${c.name}</b> · ${c.size}</td>
+      <td data-label="Periods">${b.from}<br><span style="color:var(--muted);font-size:12.5px">→ ${b.to}</span></td>
+      <td data-label="Adrese">${b.address}</td>
+      <td data-label="Summa"><b style="color:var(--green-dark)">${eur(b.total)}</b></td>
+      <td data-label="Statuss">
         <select onchange="changeStatus('${b.id}',this.value)">${sel}</select>
         <div style="margin-top:6px"><span class="status ${s.cls}">${s.label}</span></div>
       </td>
